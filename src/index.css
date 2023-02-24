@@ -45,6 +45,7 @@ button {
   font-family: inherit;
   background-color: #1a1a1a;
   cursor: pointer;
+  margin: 2rem;
   transition: border-color 0.25s;
 }
 button:hover {
@@ -53,6 +54,14 @@ button:hover {
 button:focus,
 button:focus-visible {
   outline: 4px auto -webkit-focus-ring-color;
+}
+
+label {
+  padding: 2rem;
+}
+
+input {
+  margin: 2rem;
 }
 
 @media (prefers-color-scheme: light) {
