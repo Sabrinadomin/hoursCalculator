@@ -1,4 +1,6 @@
 import React, { FormEventHandler } from "react";
+import { CgArrowLongRight } from "react-icons/cg";
+import { FaWindowClose } from "react-icons/fa";
 import "./App.css";
 
 type Props = {
@@ -10,6 +12,7 @@ interface State {
 	minutes: string[];
   sentInputs: string[];
   timeCalculated: string[];
+	totalSeconds: number;
 }
 
 interface Hour {
@@ -26,6 +29,7 @@ class App extends React.Component<Props, State> {
 			minutes: [],
 			sentInputs: [],
 			timeCalculated: [],
+			totalSeconds: 0,
 		};
 	}
 
@@ -48,6 +52,20 @@ class App extends React.Component<Props, State> {
 		return <option value={item} key={item} >{item.padStart(2, "0")}</option>;
 	}
 
+	mountResult = (input: string, index: number) => {
+		return <li key={index}>
+			{input}
+			<CgArrowLongRight className='li-arrow'/>
+			{this.state.timeCalculated[index]}
+			<span className='delete'>
+				<FaWindowClose
+					// onClick={ (e) => this.deleteTask(e, index) }
+					className='delete'
+				/>
+			</span>
+		</li>;
+	};
+
 	timeStringToSeconds(timeString: string): number {
 		const [hours, minutes] = timeString.split(":").map((str) => parseInt(str, 10));
 		return hours * 3600 + minutes * 60;
@@ -60,15 +78,16 @@ class App extends React.Component<Props, State> {
 	secondsToTimeString(totalSeconds: number): string {
 		const hours = Math.floor(totalSeconds / 3600);
 		const minutes = Math.floor((totalSeconds - hours * 3600) / 60);
-		return `${hours.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")}`;
+		return `${this.formatTime({hour: hours.toString(), minute: minutes.toString()})}`;
 	}
 
 	formatTime(hour: Hour): string {
-		return `${hour.hour.padStart(2, "0")}: ${hour.minute.padStart(2, "0")}`;
+		return `${hour.hour.padStart(2, "0")}:${hour.minute.padStart(2, "0")}`;
 	}
 
 	handleSubmit: FormEventHandler<HTMLFormElement> = (event) => {
 		event.preventDefault();
+		const { totalSeconds } = this.state;
 		const form = event.target as HTMLFormElement;
 		const startHourSelect = form.elements.namedItem("start-time-hour") as HTMLInputElement;
 		const startMinutesSelect = form.elements.namedItem("start-time-minute") as HTMLInputElement;
@@ -80,30 +99,20 @@ class App extends React.Component<Props, State> {
 
 		const startTimeSeconds = this.timeStringToSeconds(this.formatTime({ hour: startHour, minute: startMinutes }));
 		const endTimeSeconds = this.timeStringToSeconds(this.formatTime({ hour: endHour, minute: endMinutes }));
-		const formattedInput = `${startHour.padStart(2,)}:${startMinutes} to ${endHour}:${endMinutes} => `;
+		const formattedInput = `${this.formatTime({hour: startHour, minute: startMinutes})} to ${this.formatTime({hour: endHour, minute: endMinutes})}`;
 
 		const seconds = this.calculateHours(startTimeSeconds, endTimeSeconds);
+
 		this.setState(state => ({
 			sentInputs: [...state.sentInputs, formattedInput],
-			timeCalculated: [...state.timeCalculated, this.secondsToTimeString(seconds)]
+			timeCalculated: [...state.timeCalculated, this.secondsToTimeString(seconds)],
+			totalSeconds: totalSeconds + seconds
 		}));
-
-		console.log(this.state);
-		console.log(formattedInput + this.secondsToTimeString(seconds));
-
 	};
 		
 	render() {
-		const hours = [];
-		const minutes = [];
-		for (let i = 0; i < 24; i++) {
-			hours.push(i.toString());
-		}
-
-		for (let i = 0; i < 60; i++) {
-			minutes.push(i.toString());
-		}
-
+		const { sentInputs, hours, minutes, totalSeconds } = this.state;
+	
 		return (
 			<div>
 				<h2>Hours Calculator</h2>
@@ -127,6 +136,12 @@ class App extends React.Component<Props, State> {
 					</select>
 					<button type="submit">Calculate</button>
 				</form>
+
+				<ul>
+					{ sentInputs.map((input, index) => (this.mountResult(input, index))) }
+				</ul>
+
+				{totalSeconds !== 0 ? <p>Total Hours: {this.secondsToTimeString(totalSeconds)}</p> : ""}
 			</div>
 
 
