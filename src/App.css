@@ -4,3 +4,29 @@
   padding: 2rem;
   text-align: center;
 }
+
+ul li {
+  list-style-type: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px;
+}
+
+li span {
+  display: flex;
+  align-items: center;
+}
+
+li .delete {
+  margin-left: 6px;
+  color: #f07c8f;
+}
+
+.delete:hover {
+  cursor: pointer;
+}
+
+.li-arrow {
+  margin: 8px;
+}
