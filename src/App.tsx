@@ -59,21 +59,36 @@ class App extends React.Component<Props, State> {
 			{this.state.timeCalculated[index]}
 			<span className='delete'>
 				<FaWindowClose
-					// onClick={ (e) => this.deleteTask(e, index) }
+					onClick={ (e) => this.deleteCalculation(index) }
 					className='delete'
 				/>
 			</span>
 		</li>;
 	};
 
+	deleteCalculation = (index: number) => {
+		const { sentInputs, timeCalculated, totalMinutes } = this.state;
+		const newTimes = [...timeCalculated];
+		const newInputs = [...sentInputs];
+		const removedTime = newTimes.splice(index, 1)[0];
+
+		newInputs.splice(index, 1);
+
+		this.setState({
+			sentInputs: [...newInputs],
+			timeCalculated: [...newTimes],
+			totalMinutes: totalMinutes - this.timeStringToMinute(removedTime),
+		});
+	};
+
 	timeStringToMinute(timeString: string): number {
 		const [hours, minutes] = timeString.split(":").map((str) => parseInt(str, 10));
-		return hours * 3600 + minutes;
+		return hours * 60 + minutes;
 	}
 
 	minutesToTimeString(totalMinutes: number): string {
 		const hours = Math.floor(totalMinutes / 60);
-		const minutes = Math.floor(totalMinutes / 60 / 60);
+		const minutes = Math.floor(totalMinutes - hours * 60);
 		return `${this.formatTime({hour: hours.toString(), minute: minutes.toString()})}`;
 	}
 
@@ -97,8 +112,6 @@ class App extends React.Component<Props, State> {
 
 		let calculatedMinutes = endTimeMinutes < startTimeMinutes ? startTimeMinutes - (endTimeMinutes + 1440) : startTimeMinutes - endTimeMinutes;
 		calculatedMinutes = calculatedMinutes < 0 ? - calculatedMinutes : calculatedMinutes;
-
-		console.log(calculatedMinutes);
 
 		const formattedInput = `${this.formatTime({hour: startHour.value, minute: startMinutes.value})} to ${this.formatTime({hour: endHour.value, minute: endMinutes.value})}`;
 		
