@@ -12,7 +12,7 @@ interface State {
 	minutes: string[];
   sentInputs: string[];
   timeCalculated: string[];
-	totalSeconds: number;
+	totalMinutes: number;
 }
 
 interface Hour {
@@ -29,7 +29,7 @@ class App extends React.Component<Props, State> {
 			minutes: [],
 			sentInputs: [],
 			timeCalculated: [],
-			totalSeconds: 0,
+			totalMinutes: 0,
 		};
 	}
 
@@ -66,18 +66,14 @@ class App extends React.Component<Props, State> {
 		</li>;
 	};
 
-	timeStringToSeconds(timeString: string): number {
+	timeStringToMinute(timeString: string): number {
 		const [hours, minutes] = timeString.split(":").map((str) => parseInt(str, 10));
-		return hours * 3600 + minutes * 60;
+		return hours * 3600 + minutes;
 	}
 
-	calculateHours(start: number, end: number) {
-		return end - start;
-	}
-
-	secondsToTimeString(totalSeconds: number): string {
-		const hours = Math.floor(totalSeconds / 3600);
-		const minutes = Math.floor((totalSeconds - hours * 3600) / 60);
+	minutesToTimeString(totalMinutes: number): string {
+		const hours = Math.floor(totalMinutes / 60);
+		const minutes = Math.floor(totalMinutes / 60 / 60);
 		return `${this.formatTime({hour: hours.toString(), minute: minutes.toString()})}`;
 	}
 
@@ -87,31 +83,36 @@ class App extends React.Component<Props, State> {
 
 	handleSubmit: FormEventHandler<HTMLFormElement> = (event) => {
 		event.preventDefault();
-		const { totalSeconds } = this.state;
+		const { totalMinutes } = this.state;
 		const form = event.target as HTMLFormElement;
-		const startHourSelect = form.elements.namedItem("start-time-hour") as HTMLInputElement;
-		const startMinutesSelect = form.elements.namedItem("start-time-minute") as HTMLInputElement;
-		const endHourSelect = form.elements.namedItem("end-time-hour") as HTMLInputElement;
-		const endMinutesSelect = form.elements.namedItem("end-time-minute") as HTMLInputElement;
 		
-		const [startHour, startMinutes] = [startHourSelect.value, startMinutesSelect.value];
-		const [endHour, endMinutes] = [endHourSelect.value, endMinutesSelect.value];
+		const startHour = form.elements.namedItem("start-time-hour") as HTMLInputElement;
+		const startMinutes = form.elements.namedItem("start-time-minute") as HTMLInputElement;
 
-		const startTimeSeconds = this.timeStringToSeconds(this.formatTime({ hour: startHour, minute: startMinutes }));
-		const endTimeSeconds = this.timeStringToSeconds(this.formatTime({ hour: endHour, minute: endMinutes }));
-		const formattedInput = `${this.formatTime({hour: startHour, minute: startMinutes})} to ${this.formatTime({hour: endHour, minute: endMinutes})}`;
+		const endHour = form.elements.namedItem("end-time-hour") as HTMLInputElement;
+		const endMinutes = form.elements.namedItem("end-time-minute") as HTMLInputElement;
 
-		const seconds = this.calculateHours(startTimeSeconds, endTimeSeconds);
+		const startTimeMinutes = Number(startHour.value) * 60 + Number(startMinutes.value);
+		const endTimeMinutes = Number(endHour.value) * 60 + Number(endMinutes.value);
 
-		this.setState(state => ({
-			sentInputs: [...state.sentInputs, formattedInput],
-			timeCalculated: [...state.timeCalculated, this.secondsToTimeString(seconds)],
-			totalSeconds: totalSeconds + seconds
-		}));
+		let calculatedMinutes = endTimeMinutes < startTimeMinutes ? startTimeMinutes - (endTimeMinutes + 1440) : startTimeMinutes - endTimeMinutes;
+		calculatedMinutes = calculatedMinutes < 0 ? - calculatedMinutes : calculatedMinutes;
+
+		console.log(calculatedMinutes);
+
+		const formattedInput = `${this.formatTime({hour: startHour.value, minute: startMinutes.value})} to ${this.formatTime({hour: endHour.value, minute: endMinutes.value})}`;
+		
+		if(calculatedMinutes !== 0) {
+			this.setState(state => ({
+				sentInputs: [...state.sentInputs, formattedInput],
+				timeCalculated: [...state.timeCalculated, this.minutesToTimeString(calculatedMinutes)],
+				totalMinutes: totalMinutes + calculatedMinutes
+			}));
+		}
 	};
 		
 	render() {
-		const { sentInputs, hours, minutes, totalSeconds } = this.state;
+		const { sentInputs, hours, minutes, totalMinutes } = this.state;
 	
 		return (
 			<div>
@@ -141,9 +142,8 @@ class App extends React.Component<Props, State> {
 					{ sentInputs.map((input, index) => (this.mountResult(input, index))) }
 				</ul>
 
-				{totalSeconds !== 0 ? <p>Total Hours: {this.secondsToTimeString(totalSeconds)}</p> : ""}
+				{totalMinutes !== 0 ? <p>Total Hours: {this.minutesToTimeString(totalMinutes)}</p> : ""}
 			</div>
-
 
 		);
 	}
