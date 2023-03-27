@@ -59,7 +59,7 @@ class App extends React.Component<Props, State> {
 			{this.state.timeCalculated[index]}
 			<span className='delete'>
 				<FaWindowClose
-					onClick={ (e) => this.deleteCalculation(index) }
+					onClick={ () => this.deleteCalculation(index) }
 					className='delete'
 				/>
 			</span>
@@ -126,26 +126,27 @@ class App extends React.Component<Props, State> {
 		
 	render() {
 		const { sentInputs, hours, minutes, totalMinutes } = this.state;
-	
+ 
 		return (
 			<div>
 				<h2>Hours Calculator</h2>
 				<form onSubmit={this.handleSubmit}>
 					<label>Select Start Time:</label>
-					<select name="start-time-hour">
+					<select className='select' name="start-time-hour">
 						{hours.map(this.renderOptions)}
 					</select>
 
-					<select name="start-time-minute">
+					<select className='select' name="start-time-minute">
 						{minutes.map(this.renderOptions)}
 					</select>
 
 					<label>Select End Time:</label>
-					<select name="end-time-hour">
+					
+					<select className='select' name="end-time-hour">
 						{hours.map(this.renderOptions)}
 					</select>
 
-					<select name="end-time-minute">
+					<select className='select' name="end-time-minute">
 						{minutes.map(this.renderOptions)}
 					</select>
 					<button type="submit">Calculate</button>
