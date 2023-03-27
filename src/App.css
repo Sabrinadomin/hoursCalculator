@@ -30,3 +30,21 @@ li .delete {
 .li-arrow {
   margin: 8px;
 }
+
+.select {
+  /* display:block; */
+  width: 70px;
+  height: 40px;
+  margin: 2px;
+}
+
+.select {
+  /* display:block; */
+  width: 10%;
+  height: 40px;
+  margin: 2px;
+}
+
+/* .calculated-hours-list {
+  overflow: hidden
+} */
